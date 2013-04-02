@@ -1,0 +1,24 @@
+#filter substitution
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+         xmlns:gecko="http://schemas.android.com/apk/res/@ANDROID_PACKAGE_NAME@"
+         android:enabled="false">
+    <CheckBoxPreference android:key="toolkit.telemetry.enabled"
+                        android:title="@string/datachoices_telemetry_title"
+                        android:summary="@string/datachoices_telemetry_summary" />
+
+    <CheckBoxPreference android:key="android.not_a_preference.healthreport.uploadEnabled"
+                        android:title="@string/datachoices_fhr_title"
+                        android:summary="@string/datachoices_fhr_summary"
+                        android:defaultValue="true" />
+
+    <CheckBoxPreference android:key="datanotification.crashreporter.submitEnabled"
+                        android:title="@string/datachoices_crashreporter_title"
+                        android:summary="@string/datachoices_crashreporter_summary"
+                        android:defaultValue="false" />
+</PreferenceScreen>

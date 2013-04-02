@@ -932,6 +932,14 @@ var BrowserApp = {
           pref.value = MasterPassword.enabled;
           prefs.push(pref);
           continue;
+#ifdef MOZ_CRASHREPORTER
+        } else if (prefName == DataNotification.PREF_CRASHREPORTER_SUBMIT) {
+          // Crash reporter submit pref must be fetched from nsICrashReporter service.
+          pref.type = "bool";
+          pref.value = CrashReporter.submitReports;
+          prefs.push(pref);
+          continue;
+#endif
         }
 
         try {
@@ -1029,6 +1037,12 @@ var BrowserApp = {
     } else if (json.name == SearchEngines.PREF_SUGGEST_ENABLED) {
       // Enabling or disabling suggestions will prevent future prompts
       Services.prefs.setBoolPref(SearchEngines.PREF_SUGGEST_PROMPTED, true);
+#ifdef MOZ_CRASHREPORTER
+    } else if (json.name == DataNotification.PREF_CRASHREPORTER_SUBMIT) {
+      // Crash reporter submit pref.
+      CrashReporter.submitReports = json.value;
+      return;
+#endif
     }
 
     // when sending to java, we normalized special preferences that use
@@ -6226,6 +6240,11 @@ var RemoteDebugger = {
 
 let DataNotification = {
   PREF_TELEMETRY_SERVER_OWNER: "toolkit.telemetry.server_owner",
+#ifdef MOZ_CRASHREPORTER
+  // Crash reporting preference used in datachoices_preferences.xml.in.
+  PREF_CRASHREPORTER_SUBMIT: "datanotification.crashreporter.submitEnabled",
+#endif
+
   _OBSERVERS: [
     "datareporting:notify-data-policy:request",
   ],

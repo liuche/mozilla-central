@@ -93,21 +93,19 @@
                             android:defaultValue="true"
                             android:persistent="false" />
 
-#ifdef MOZ_TELEMETRY_REPORTING
-        <CheckBoxPreference
-#ifdef MOZ_TELEMETRY_ON_BY_DEFAULT
-                            android:key="toolkit.telemetry.enabledPreRelease"
-#else
-                            android:key="toolkit.telemetry.enabled"
-#endif
-                            android:title="@string/pref_telemetry"
-                            android:persistent="false" />
-#endif
-
         <CheckBoxPreference android:key="android.not_a_preference.privacy.announcements.enabled"
                             android:title="@string/pref_show_product_announcements"
                             android:defaultValue="true"
                             android:persistent="true" />
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_category_advanced">
+        <Preference android:title="@string/datachoices_title">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="@ANDROID_PACKAGE_NAME@"
+                android:targetClass="org.mozilla.gecko.GeckoDataPreferences" />
+        </Preference>
 
     </PreferenceCategory>
 

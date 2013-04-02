@@ -99,7 +99,9 @@ FENNEC_JAVA_FILES = \
   GeckoMenuItem.java \
   GeckoMessageReceiver.java \
   GeckoSubMenu.java \
+  GeckoPreferencesActivity.java \
   GeckoPreferences.java \
+  GeckoDataPreferences.java \
   GeckoProfile.java \
   GeckoPopupMenu.java \
   GeckoThread.java \
@@ -260,6 +262,8 @@ FENNEC_PP_JAVA_FILES = \
 
 FENNEC_PP_XML_FILES = \
   res/xml/preferences.xml \
+  res/xml/datachoices_preferences.xml \
+  res/xml-v14/datachoices_preferences.xml \
   res/xml/searchable.xml \
   res/menu/browser_app_menu.xml \
   res/menu-v11/browser_app_menu.xml \
@@ -1049,6 +1053,7 @@ RES_DIRS= \
   res/values-xlarge-v11         \
   res/values-land-v14           \
   res/xml                       \
+  res/xml-v14                   \
   res/anim                      \
   res/drawable-ldpi             \
   res/drawable-mdpi             \
