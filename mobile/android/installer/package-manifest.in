@@ -377,10 +377,12 @@
 @BINPATH@/components/PeerConnection.manifest
 #endif
 
-#ifdef MOZ_SERVICES_HEALTHREPORT
-@BINPATH@/components/HealthReportComponents.manifest
-@BINPATH@/components/HealthReportService.js
+#ifdef MOZ_DATA_REPORTING
+@BINPATH@/components/DataReporting.manifest
+@BINPATH@/components/DataReportingService.js
 #endif
+
+@BINPATH@/components/servicesComponents.manifest
 
 #ifdef MOZ_CAPTIVEDETECT
 @BINPATH@/components/CaptivePortalDetectComponents.manifest
