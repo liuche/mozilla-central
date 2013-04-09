@@ -283,6 +283,7 @@ var BrowserApp = {
     ExternalApps.init();
     Distribution.init();
     Tabs.init();
+    DataNotification.init();
 #ifdef MOZ_TELEMETRY_REPORTING
     Telemetry.init();
 #endif
@@ -567,6 +568,7 @@ var BrowserApp = {
     ExternalApps.uninit();
     Distribution.uninit();
     Tabs.uninit();
+    DataNotification.uninit();
 #ifdef MOZ_TELEMETRY_REPORTING
     Telemetry.uninit();
 #endif
@@ -6222,6 +6224,69 @@ var RemoteDebugger = {
   }
 };
 
+let DataNotification = {
+  PREF_TELEMETRY_SERVER_OWNER: "toolkit.telemetry.server_owner",
+  _OBSERVERS: [
+    "datareporting:notify-data-policy:request",
+  ],
+
+  init: function init() {
+    for (let o of this._OBSERVERS) {
+      Services.obs.addObserver(this, o, false);
+    }
+  },
+
+  uninit: function uninit() {
+    for (let o of this._OBSERVERS) {
+      Services.obs.removeObserver(this, o, false);
+    }
+  },
+
+  onNotifyDataPolicy: function(request) {
+    if (request == null) {
+      return;
+    }
+    try {
+      this._displayDataPolicyNotification(request);
+    } catch (ex) {
+      request.onUserNotifyFailed(ex);
+    }
+  },
+
+  _clearPolicyNotification: function() {
+    NativeWindow.doorhanger.hide();
+  },
+
+  observe: function observe(aSubject, aTopic, aData) {
+    switch (aTopic) {
+      case "datareporting:notify-data-policy:request":
+        this.onNotifyDataPolicy(aSubject.wrappedJSObject.object);
+        break;
+
+      default:
+        dump("Unhandled observer topic: " + aTopic);
+    }
+  },
+
+  _displayDataPolicyNotification: function(request) {
+    let brandShortName = Strings.brand.GetStringFromName("brandShortName");
+    let serverOwner = Services.prefs.getCharPref(this.PREF_TELEMETRY_SERVER_OWNER);
+    let message = Strings.browser.formatStringFromName("dataReportingNotification.message", [brandShortName, serverOwner], 2);
+    let buttons = [
+      {
+        label: Strings.browser.GetStringFromName("dataReportingNotification.button.label"),
+        callback: function () {
+          // Policy is accepted.
+          request.onUserAccept("info-bar-button-pressed");
+          // next: hook in settings activity.
+        }
+      }
+    ];
+
+    NativeWindow.doorhanger.show(message, "data-reporting-prompt", buttons, BrowserApp.selectedTab.id, { persistence: -1 });
+  },
+};
+
 var Telemetry = {
 #ifdef MOZ_TELEMETRY_ON_BY_DEFAULT
   _PREF_TELEMETRY_ENABLED: "toolkit.telemetry.enabledPreRelease",
@@ -6271,6 +6336,14 @@ var Telemetry = {
       this.prompt();
 #endif
     }
+  },
+
+  getEnabled: function() {
+    return Services.prefs.getBoolPref(this._PREF_TELEMETRY_ENABLED);
+  },
+
+  setEnabled: function(toEnable) {
+    Services.prefs.setBoolPref(this._PREF_TELEMETRY_ENABLED, toEnable);
   },
 
   prompt: function prompt() {
