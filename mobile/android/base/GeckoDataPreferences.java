@@ -9,6 +9,7 @@ import org.mozilla.gecko.GeckoPreferencesActivity;
 
 import android.app.Activity;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -22,6 +23,11 @@ public class GeckoDataPreferences
     @Override
     protected int getPreferencesResource() {
         return R.xml.datachoices_preferences;
+    }
+
+    @Override
+    protected void setupPrefsBranch() {
+        this.getPreferenceManager().setSharedPreferencesName(PREFS_BRANCH);
     }
 
     @Override

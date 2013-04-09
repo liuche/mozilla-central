@@ -48,6 +48,7 @@ public abstract class GeckoPreferencesActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupPrefsBranch();
         addPreferencesFromResource(getPreferencesResource());
         registerEventListener("Sanitize:Finished");
 
@@ -57,6 +58,11 @@ public abstract class GeckoPreferencesActivity
 
     // Return preferences resource id.
     protected abstract int getPreferencesResource();
+
+    // Override if using non-default prefs branch.
+    protected void setupPrefsBranch() {
+        return;
+    }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
