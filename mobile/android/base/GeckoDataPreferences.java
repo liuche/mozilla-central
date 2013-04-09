@@ -8,14 +8,22 @@ package org.mozilla.gecko;
 import org.mozilla.gecko.GeckoPreferencesActivity;
 
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 public class GeckoDataPreferences
     extends GeckoPreferencesActivity
 {
+    private static final String PREFS_BRANCH = "datareporting";
+
     @Override
     protected int getPreferencesResource() {
         return R.xml.datareporting_preferences;
+    }
+
+    @Override
+    protected void setupPrefsBranch() {
+        this.getPreferenceManager().setSharedPreferencesName(PREFS_BRANCH);
     }
 
     @Override
