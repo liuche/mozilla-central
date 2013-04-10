@@ -7,12 +7,18 @@ package org.mozilla.gecko;
 
 import org.mozilla.gecko.GeckoPreferencesActivity;
 
+import android.app.Activity;
 import android.preference.Preference;
 import android.text.TextUtils;
+import android.util.Log;
 
 public class GeckoDataPreferences
     extends GeckoPreferencesActivity
 {
+    public static final String PREFS_BRANCH = "datareporting";
+    private static final String LOGTAG = "GeckoDataPreferences";
+    private static final String PREF_HEALTHREPORT_ENABLED = NON_PREF_PREFIX + "healthreport.uploadEnabled";
+
     @Override
     protected int getPreferencesResource() {
         return R.xml.datachoices_preferences;
@@ -20,9 +26,14 @@ public class GeckoDataPreferences
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        String prefName = preference.getKey();
+        final String prefName = preference.getKey();
         if (!TextUtils.isEmpty(prefName)) {
-          PrefsHelper.setPref(prefName, newValue);
+            if (PREF_HEALTHREPORT_ENABLED.equals(prefName)) {
+                // Healthreport pref is not mirrored to Gecko.
+                return true;
+            }
+            // Set pref value in Gecko.
+            PrefsHelper.setPref(prefName, newValue);
         }
         return true;
     }

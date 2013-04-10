@@ -8,7 +8,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
          xmlns:gecko="http://schemas.android.com/apk/res/@ANDROID_PACKAGE_NAME@"
          android:enabled="false">
-    <CheckBoxPreference android:key="toolkit.telemetry.enabled"
+    <CheckBoxPreference android:key="datareporting.telemetry.enabled"
                         android:title="@string/datachoices_telemetry_title"
                         android:summary="@string/datachoices_telemetry_summary" />
 

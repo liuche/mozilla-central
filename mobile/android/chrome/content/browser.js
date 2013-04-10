@@ -940,6 +940,13 @@ var BrowserApp = {
           prefs.push(pref);
           continue;
 #endif
+        } else if (prefName == DataNotification.SHARED_PREF_TELEMETRY_ENABLED) {
+          // Android Telemetry-enabled pref does not map to Telemetry's
+          // per-release prefs.
+          pref.type = "bool";
+          pref.value = Telemetry.getEnabled();
+          prefs.push(pref);
+          continue;
         }
 
         try {
@@ -1043,6 +1050,11 @@ var BrowserApp = {
       CrashReporter.submitReports = json.value;
       return;
 #endif
+    } else if (json.name == DataNotification.SHARED_PREF_TELEMETRY_ENABLED) {
+      // Java Telemetry-enabled pref does not map directly to Telemetry's
+      // per-release pref.
+      Telemetry.setEnabled(json.value);
+      return;
     }
 
     // when sending to java, we normalized special preferences that use
@@ -6245,6 +6257,10 @@ let DataNotification = {
   PREF_CRASHREPORTER_SUBMIT: "datanotification.crashreporter.submitEnabled",
 #endif
 
+  SHARED_PREF_HEALTHREPORT_ENABLED: "android.not_a_preference.healthreport.uploadEnabled",
+  SHARED_PREF_TELEMETRY_ENABLED: "datareporting.telemetry.enabled",
+  SHARED_PREF_ACCEPTED: "datareporting.policy.accepted",
+
   _OBSERVERS: [
     "datareporting:notify-data-policy:request",
   ],
@@ -6297,7 +6313,26 @@ let DataNotification = {
         callback: function () {
           // Policy is accepted.
           request.onUserAccept("info-bar-button-pressed");
-          // next: hook in settings activity.
+
+          // Mirror prefs to SharedPreferences in Java for upload service.
+          let prefs = [];
+          prefs.push({
+            name: DataNotification.SHARED_PREF_ACCEPTED,
+            type: "bool",
+            value: true,
+          });
+
+          sendMessageToJava({
+            type: "SharedPreferences:Set",
+            preferences: prefs,
+            branch: "datareporting",
+          });
+
+          // Launch Data Choices preferences activity.
+          sendMessageToJava({
+            type: "Activity:Launch",
+            classname: "org.mozilla.gecko.GeckoDataPreferences",
+          });
         }
       }
     ];
