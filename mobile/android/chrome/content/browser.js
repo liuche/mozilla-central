@@ -954,6 +954,21 @@ var BrowserApp = {
           pref.value = MasterPassword.enabled;
           prefs.push(pref);
           continue;
+#ifdef MOZ_CRASHREPORTER
+        } else if (prefName == "datareporting.crashreporter.submitEnabled") {
+          // Crash reporter submit pref must be fetched from nsICrashReporter service.
+          pref.type = "bool";
+          pref.value = CrashReporter.submitReports;
+          prefs.push(pref);
+          continue;
+#endif
+        } else if (prefName == Telemetry.SHARED_PREF_TELEMETRY_ENABLED) {
+          // Android Telemetry-enabled pref does not map to Telemetry's
+          // per-release prefs.
+          pref.type = "bool";
+          pref.value = Telemetry.getEnabled();
+          prefs.push(pref);
+          continue;
         }
 
         try {
@@ -1051,6 +1066,17 @@ var BrowserApp = {
     } else if (json.name == SearchEngines.PREF_SUGGEST_ENABLED) {
       // Enabling or disabling suggestions will prevent future prompts
       Services.prefs.setBoolPref(SearchEngines.PREF_SUGGEST_PROMPTED, true);
+#ifdef MOZ_CRASHREPORTER
+    } else if (json.name == "datareporting.crashreporter.submitEnabled") {
+      // Crash reporter submit pref.
+      CrashReporter.submitReports = json.value;
+      return;
+#endif
+    } else if (json.name == Telemetry.SHARED_PREF_TELEMETRY_ENABLED) {
+      // Java Telemetry-enabled pref does not map directly to Telemetry's
+      // per-release pref.
+      Telemetry.setEnabled(json.value);
+      return;
     }
 
     // when sending to java, we normalized special preferences that use
@@ -6351,6 +6377,7 @@ var Telemetry = {
 #else
   _PREF_TELEMETRY_ENABLED: "toolkit.telemetry.enabled",
 #endif
+  SHARED_PREF_TELEMETRY_ENABLED: "datareporting.telemetry.enabled",
 
   init: function init() {
     Services.obs.addObserver(this, "Telemetry:Add", false);
@@ -6371,6 +6398,14 @@ var Telemetry = {
       let json = JSON.parse(aData);
       this.addData(json.name, json.value);
     }
+  },
+
+  getEnabled: function() {
+    return Services.prefs.getBoolPref(this._PREF_TELEMETRY_ENABLED);
+  },
+
+  setEnabled: function(toEnable) {
+    Services.prefs.setBoolPref(this._PREF_TELEMETRY_ENABLED, toEnable);
   },
 };
 
