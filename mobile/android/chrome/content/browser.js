@@ -284,8 +284,11 @@ var BrowserApp = {
     ExternalApps.init();
     Distribution.init();
     Tabs.init();
+#ifdef MOZ_DATA_REPORTING
+    DataReportingNotification.init();
 #ifdef MOZ_TELEMETRY_REPORTING
     Telemetry.init();
+#endif
 #endif
 #ifdef ACCESSIBILITY
     AccessFu.attach(window);
@@ -568,8 +571,11 @@ var BrowserApp = {
     ExternalApps.uninit();
     Distribution.uninit();
     Tabs.uninit();
+#ifdef MOZ_DATA_REPORTING
+    DataReportingNotification.uninit();
 #ifdef MOZ_TELEMETRY_REPORTING
     Telemetry.uninit();
+#endif
 #endif
   },
 
@@ -6269,6 +6275,81 @@ var RemoteDebugger = {
     DebuggerServer.closeListener();
     dump("Remote debugger stopped");
   }
+};
+
+/**
+ * Handles display notification of policy changes to the user.
+ *
+ * DataReportingNotification listens for a notification request from
+ * policy.jsm requesting display of a notification to the user
+ * regarding data policy. It then displays such notifications
+ * in UI, and on explicit acceptance, calls the request callback
+ * onUserAccept().
+ *
+ * DataReportingNotification does not display an option to reject the
+ * notification, so it does not implement the onUserReject()
+ * callback of the notification request.
+ */
+let DataReportingNotification = {
+  PREF_TELEMETRY_SERVER_OWNER: "toolkit.telemetry.server_owner",
+  _OBSERVERS: [
+    "datareporting:notify-data-policy:request",
+  ],
+
+  init: function init() {
+    for (let o of this._OBSERVERS) {
+      Services.obs.addObserver(this, o, false);
+    }
+  },
+
+  uninit: function uninit() {
+    for (let o of this._OBSERVERS) {
+      Services.obs.removeObserver(this, o);
+    }
+  },
+
+  _onNotifyDataPolicy: function(request) {
+    if (request == null) {
+      return;
+    }
+    try {
+      this._displayDataPolicyNotification(request);
+    } catch (ex) {
+      request.onUserNotifyFailed(ex);
+    }
+  },
+
+  observe: function observe(aSubject, aTopic, aData) {
+    switch (aTopic) {
+      case "datareporting:notify-data-policy:request":
+        this._onNotifyDataPolicy(aSubject.wrappedJSObject.object);
+        break;
+
+      default:
+        dump("Unhandled observer topic: " + aTopic);
+    }
+  },
+
+  _displayDataPolicyNotification: function(request) {
+    let brandShortName = Strings.brand.GetStringFromName("brandShortName");
+    let serverOwner = Services.prefs.getCharPref(this.PREF_TELEMETRY_SERVER_OWNER);
+    let message = Strings.browser.formatStringFromName("dataReportingNotification.message", [brandShortName, serverOwner], 2);
+    let buttons = [
+      {
+        label: Strings.browser.GetStringFromName("dataReportingNotification.button.label"),
+        callback: function () {
+          // Policy is accepted.
+          request.onUserAccept("info-bar-button-pressed");
+          // next: hook in settings activity.
+        }
+      }
+    ];
+
+    // Set doorhanger options to never automatically dismiss.
+    let options = { persistence: -1};
+
+    NativeWindow.doorhanger.show(message, "data-reporting-prompt", buttons, BrowserApp.selectedTab.id, options);
+  },
 };
 
 var Telemetry = {
