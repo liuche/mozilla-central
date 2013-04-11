@@ -937,6 +937,21 @@ var BrowserApp = {
           pref.value = MasterPassword.enabled;
           prefs.push(pref);
           continue;
+#ifdef MOZ_CRASHREPORTER
+        } else if (prefName == DataReportingNotification.PREF_CRASHREPORTER_SUBMIT) {
+          // Crash reporter submit pref must be fetched from nsICrashReporter service.
+          pref.type = "bool";
+          pref.value = CrashReporter.submitReports;
+          prefs.push(pref);
+          continue;
+#endif
+        } else if (prefName == DataReportingNotification.SHARED_PREF_TELEMETRY_ENABLED) {
+          // Android Telemetry-enabled pref does not map to Telemetry's
+          // per-release prefs.
+          pref.type = "bool";
+          pref.value = Telemetry.getEnabled();
+          prefs.push(pref);
+          continue;
         }
 
         try {
@@ -1034,6 +1049,17 @@ var BrowserApp = {
     } else if (json.name == SearchEngines.PREF_SUGGEST_ENABLED) {
       // Enabling or disabling suggestions will prevent future prompts
       Services.prefs.setBoolPref(SearchEngines.PREF_SUGGEST_PROMPTED, true);
+#ifdef MOZ_CRASHREPORTER
+    } else if (json.name == DataReportingNotification.PREF_CRASHREPORTER_SUBMIT) {
+      // Crash reporter submit pref.
+      CrashReporter.submitReports = json.value;
+      return;
+#endif
+    } else if (json.name == DataReportingNotification.SHARED_PREF_TELEMETRY_ENABLED) {
+      // Java Telemetry-enabled pref does not map directly to Telemetry's
+      // per-release pref.
+      Telemetry.setEnabled(json.value);
+      return;
     }
 
     // when sending to java, we normalized special preferences that use
@@ -6292,6 +6318,14 @@ var RemoteDebugger = {
  */
 let DataReportingNotification = {
   PREF_TELEMETRY_SERVER_OWNER: "toolkit.telemetry.server_owner",
+#ifdef MOZ_CRASHREPORTER
+  // Crash reporting preference used in datachoices_preferences.xml.in.
+  PREF_CRASHREPORTER_SUBMIT: "datareporting.crashreporter.submitEnabled",
+#endif
+
+  SHARED_PREF_TELEMETRY_ENABLED: "datareporting.telemetry.enabled",
+  SHARED_PREF_ACCEPTED: "datareporting.policy.accepted",
+
   _OBSERVERS: [
     "datareporting:notify-data-policy:request",
   ],
@@ -6340,7 +6374,26 @@ let DataReportingNotification = {
         callback: function () {
           // Policy is accepted.
           request.onUserAccept("info-bar-button-pressed");
-          // next: hook in settings activity.
+
+          // Mirror prefs to SharedPreferences in Java for upload service.
+          let prefs = [];
+          prefs.push({
+            name: DataReportingNotification.SHARED_PREF_ACCEPTED,
+            type: "bool",
+            value: true,
+          });
+
+          sendMessageToJava({
+            type: "AndroidSharedPreferences:Set",
+            preferences: prefs,
+            branch: "datareporting",
+          });
+
+          // Launch Data Choices preferences activity.
+          sendMessageToJava({
+            type: "Activity:Launch",
+            classname: "org.mozilla.gecko.GeckoDataPreferences",
+          });
         }
       }
     ];
@@ -6378,6 +6431,14 @@ var Telemetry = {
       let json = JSON.parse(aData);
       this.addData(json.name, json.value);
     }
+  },
+
+  getEnabled: function() {
+    return Services.prefs.getBoolPref(this._PREF_TELEMETRY_ENABLED);
+  },
+
+  setEnabled: function(toEnable) {
+    Services.prefs.setBoolPref(this._PREF_TELEMETRY_ENABLED, toEnable);
   },
 };
 
