@@ -101,6 +101,7 @@ FENNEC_JAVA_FILES = \
   GeckoMenuItem.java \
   GeckoMessageReceiver.java \
   GeckoSubMenu.java \
+  GeckoPreferencesActivity.java \
   GeckoPreferences.java \
   GeckoProfile.java \
   GeckoPopupMenu.java \
