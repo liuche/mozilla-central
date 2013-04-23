@@ -77,6 +77,7 @@ FENNEC_JAVA_FILES = \
   db/BrowserDB.java \
   db/LocalBrowserDB.java \
   db/DBUtils.java \
+  DataReportingNotification.java \
   Distribution.java \
   Divider.java \
   DoorHanger.java \
