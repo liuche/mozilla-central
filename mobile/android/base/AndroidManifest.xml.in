@@ -190,6 +190,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name="org.mozilla.gecko.DataReportingNotification"
+            android:exported="false" />
+
         <activity android:name="org.mozilla.gecko.Restarter"
                   android:process="@ANDROID_PACKAGE_NAME@Restarter"
                   android:theme="@style/Gecko">
