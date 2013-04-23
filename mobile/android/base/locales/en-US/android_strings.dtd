@@ -118,6 +118,9 @@ size. -->
 <!ENTITY pref_private_data_siteSettings2 "Site settings">
 <!ENTITY pref_private_data_downloadFiles "Downloaded files">
 
+<!ENTITY datareporting_notification_title "&brandShortName; metrics reporting">
+<!ENTITY datareporting_notification_summary "Tap to choose what to send">
+
 <!-- Localization note (datareporting_title) : This string matches
      (dataChoicesTab.label) in chrome/browser/preferences/advanced.dtd except in
      capitalization. -->
