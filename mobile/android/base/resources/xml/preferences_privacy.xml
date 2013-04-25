@@ -50,6 +50,31 @@
                             android:defaultValue="true"
                             android:persistent="true" />
 
+        <PreferenceScreen android:title="@string/pref_category_datareporting">
+
+            <PreferenceCategory android:title="@string/pref_category_datareporting">
+
+#ifdef MOZ_TELEMETRY_REPORTING
+                <CheckBoxPreference android:key="datareporting.telemetry.enabled"
+                                    android:title="@string/datareporting_telemetry_title"
+                                    android:summary="@string/datareporting_telemetry_summary" />
+
+#endif
+                <CheckBoxPreference android:key="android.not_a_preference.healthreport.uploadEnabled"
+                                    android:title="@string/datareporting_fhr_title"
+                                    android:summary="@string/datareporting_fhr_summary"
+                                    android:defaultValue="true" />
+
+#ifdef MOZ_CRASHREPORTER
+                <CheckBoxPreference android:key="datareporting.crashreporter.submitEnabled"
+                                    android:title="@string/datareporting_crashreporter_title"
+                                    android:summary="@string/datareporting_crashreporter_summary"
+                                    android:defaultValue="false" />
+#endif
+            </PreferenceCategory>
+
+        </PreferenceScreen>
+
     </PreferenceCategory>
 
 </PreferenceScreen>

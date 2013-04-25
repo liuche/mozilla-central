@@ -25,6 +25,7 @@ public class GeckoPreferenceFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupPrefsBranch();
         String resource = getArguments().getString("resource");
         int res = getActivity().getResources().getIdentifier(resource,
                                                              "xml",
@@ -36,6 +37,11 @@ public class GeckoPreferenceFragment extends PreferenceFragment {
         PreferenceScreen screen = stripCategories(getPreferenceScreen());
         setPreferenceScreen(screen);
         ((GeckoPreferences)getActivity()).setupPreferences(screen);
+    }
+
+    // Override if using non-default prefs branch.
+    protected void setupPrefsBranch() {
+        return;
     }
 
     private PreferenceScreen stripCategories(PreferenceScreen preferenceScreen) {

@@ -29,6 +29,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.preference.TwoStatePreference;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -59,6 +60,7 @@ public class GeckoPreferences
     private static String PREFS_ANNOUNCEMENTS_ENABLED = NON_PREF_PREFIX + "privacy.announcements.enabled";
     private static String PREFS_CATEGORY_GENERAL = "category_general";
     private static String PREFS_CATEGORY_PRIVACY = "category_privacy";
+    private static String PREFS_HEALTHREPORT_UPLOAD_ENABLED = NON_PREF_PREFIX + "healthreport.uploadEnabled";
     private static String PREFS_MENU_CHAR_ENCODING = "browser.menu.showCharacterEncoding";
     private static String PREFS_MP_ENABLED = "privacy.masterpassword.enabled";
     private static String PREFS_UPDATER_AUTODOWNLOAD = "app.update.autodownload";
@@ -266,6 +268,9 @@ public class GeckoPreferences
             broadcastAnnouncementsPref(GeckoApp.mAppContext, ((Boolean) newValue).booleanValue());
         } else if (PREFS_UPDATER_AUTODOWNLOAD.equals(prefName)) {
             org.mozilla.gecko.updater.UpdateServiceHelper.registerForUpdates(GeckoApp.mAppContext, (String)newValue);
+        } else if (PREFS_HEALTHREPORT_UPLOAD_ENABLED.equals(prefName)) {
+            // Healthreport pref only lives in Android. Do not persist to Gecko.
+            return true;
         }
 
         if (!TextUtils.isEmpty(prefName)) {
@@ -451,18 +456,40 @@ public class GeckoPreferences
                 return screen.findPreference(prefName);
             }
 
+            // Handle v14 TwoStatePreference with backwards compatibility.
+            class CheckBoxPrefSetter {
+                public void setBooleanPref(Preference preference, boolean value) {
+                    if ((preference instanceof CheckBoxPreference) &&
+                       ((CheckBoxPreference) preference).isChecked() != value) {
+                        ((CheckBoxPreference) preference).setChecked(value);
+                    }
+                }
+            }
+
+            class TwoStatePrefSetter extends CheckBoxPrefSetter {
+                @Override
+                public void setBooleanPref(Preference preference, boolean value) {
+                    if ((preference instanceof TwoStatePreference) &&
+                       ((TwoStatePreference) preference).isChecked() != value) {
+                        ((TwoStatePreference) preference).setChecked(value);
+                    }
+                }
+            }
+
             @Override
             public void prefValue(String prefName, final boolean value) {
                 final Preference pref = getField(prefName);
-                if (pref instanceof CheckBoxPreference) {
-                    ThreadUtils.postToUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (((CheckBoxPreference)pref).isChecked() != value)
-                                ((CheckBoxPreference)pref).setChecked(value);
-                        }
-                    });
+                final CheckBoxPrefSetter prefSetter;
+                if (Build.VERSION.SDK_INT < 14) {
+                    prefSetter = new CheckBoxPrefSetter();
+                } else {
+                    prefSetter = new TwoStatePrefSetter();
                 }
+                ThreadUtils.postToUiThread(new Runnable() {
+                    public void run() {
+                        prefSetter.setBooleanPref(pref, value);
+                    }
+                });
             }
 
             @Override
