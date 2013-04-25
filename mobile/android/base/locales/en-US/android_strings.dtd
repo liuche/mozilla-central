@@ -69,7 +69,6 @@
 <!ENTITY pref_category_privacy "Privacy &amp; Security">
 <!ENTITY pref_category_content "Content">
 <!ENTITY pref_about_firefox "About &brandShortName;">
-<!ENTITY pref_telemetry "Send performance data">
 <!ENTITY pref_remember_signons "Remember passwords">
 
 <!-- Localization note: These are shown in the left sidebar on tablets -->

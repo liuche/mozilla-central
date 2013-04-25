@@ -46,10 +46,6 @@
                             android:defaultValue="true"
                             android:persistent="false" />
 
-        <CheckBoxPreference android:key="toolkit.telemetry.enabled"
-                            android:title="@string/pref_telemetry"
-                            android:persistent="false" />
-
         <CheckBoxPreference android:key="android.not_a_preference.privacy.announcements.enabled"
                             android:title="@string/pref_show_product_announcements"
                             android:defaultValue="true"

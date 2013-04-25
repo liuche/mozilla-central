@@ -62,8 +62,6 @@ public class GeckoPreferences
     private static String PREFS_CATEGORY_PRIVACY = "category_privacy";
     private static String PREFS_MENU_CHAR_ENCODING = "browser.menu.showCharacterEncoding";
     private static String PREFS_MP_ENABLED = "privacy.masterpassword.enabled";
-    private static String PREFS_TELEMETRY_ENABLED = "toolkit.telemetry.enabled";
-    private static String PREFS_TELEMETRY_ENABLED_PRERELEASE = "toolkit.telemetry.enabledPreRelease";
     private static String PREFS_UPDATER_AUTODOWNLOAD = "app.update.autodownload";
     private static String PREFS_TITLEBAR_MODE = "android.not_a_preference.privacy.titlebar";
 
@@ -175,17 +173,6 @@ public class GeckoPreferences
                     preferences.removePreference(pref);
                     i--;
                     continue;
-                } else if (PREFS_TELEMETRY_ENABLED.equals(key)) {
-                    if (AppConstants.MOZ_TELEMETRY_REPORTING) {
-                        if (AppConstants.MOZ_TELEMETRY_ON_BY_DEFAULT) {
-                            pref.setKey(PREFS_TELEMETRY_ENABLED_PRERELEASE);
-                            key = PREFS_TELEMETRY_ENABLED_PRERELEASE;
-                        }
-                    } else {
-                        preferences.removePreference(pref);
-                        i--;
-                        continue;
-                    }
                 } else if (PREFS_TITLEBAR_MODE.equals(key)) {
                     setupTitlebarPref((ListPreference)pref);
                 }
