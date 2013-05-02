@@ -48,6 +48,7 @@ public class GeckoPreferences
     implements OnPreferenceChangeListener, GeckoEventListener, GeckoActivityStatus
 {
     private static final String LOGTAG = "GeckoPreferences";
+    private static final String INTENT_EXTRA_RESOURCES = "resource";
 
     private ArrayList<String> mPreferencesList;
     private PreferenceScreen mPreferenceScreen;
@@ -72,9 +73,20 @@ public class GeckoPreferences
 
         // If this is a smaller screen
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB || !onIsMultiPane()) {
-            addPreferencesFromResource(R.xml.preferences_general);
-            addPreferencesFromResource(R.xml.preferences_content);
-            addPreferencesFromResource(R.xml.preferences_privacy);
+            // Determine what resource to load from the intent.
+            Bundle extras = getIntent().getExtras();
+            if (extras != null && extras.containsKey(INTENT_EXTRA_RESOURCES)) {
+                String resource = extras.getString(INTENT_EXTRA_RESOURCES);
+                int res = this.getResources().getIdentifier(resource,
+                                                            "xml",
+                                                            this.getPackageName());
+                addPreferencesFromResource(res);
+            } else {
+                // No resources specified - load top-level settings screen.
+                addPreferencesFromResource(R.xml.preferences_general);
+                addPreferencesFromResource(R.xml.preferences_content);
+                addPreferencesFromResource(R.xml.preferences_privacy);
+            }
         }
 
         registerEventListener("Sanitize:Finished");
