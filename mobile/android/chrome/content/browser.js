@@ -998,6 +998,23 @@ var BrowserApp = {
 
           prefs.push(pref);
           continue;
+#ifdef MOZ_CRASHREPORTER
+        // Crash reporter submit pref must be fetched from nsICrashReporter service.
+        case "datareporting.crashreporter.submitEnabled":
+          pref.type = "bool";
+          pref.value = CrashReporter.submitReports;
+          prefs.push(pref);
+          continue;
+#endif
+#ifdef MOZ_TELEMETRY_REPORTING
+        // Android Telemetry-enabled pref does not map to Telemetry's
+        // per-release prefs.
+        case Telemetry.SHARED_PREF_TELEMETRY_ENABLED:
+          pref.type = "bool";
+          pref.value = Telemetry.getEnabled();
+          prefs.push(pref);
+          continue;
+#endif
         }
       }
 
@@ -1114,6 +1131,19 @@ var BrowserApp = {
         Services.prefs.setBoolPref(SearchEngines.PREF_SUGGEST_PROMPTED, true);
         break;
 
+#ifdef MOZ_CRASHREPORTER
+      // Crash reporter preference is in a service; set and return.
+      case "datareporting.crashreporter.submitEnabled":
+        CrashReporter.submitReports = json.value;
+        return;
+#endif
+#ifdef MOZ_TELEMETRY_REPORTING
+      // Java Telemetry-enabled pref does not map directly to Telemetry's
+      // per-release pref.
+      case Telemetry.SHARED_PREF_TELEMETRY_ENABLED:
+        Telemetry.setEnabled(json.value);
+        return;
+#endif
       // When sending to Java, we normalized special preferences that use
       // integers and strings to represent booleans. Here, we convert them back
       // to their actual types so we can store them.
@@ -6429,6 +6459,7 @@ var Telemetry = {
 #else
   _PREF_TELEMETRY_ENABLED: "toolkit.telemetry.enabled",
 #endif
+  SHARED_PREF_TELEMETRY_ENABLED: "datareporting.telemetry.enabled",
 
   init: function init() {
     Services.obs.addObserver(this, "Telemetry:Add", false);
@@ -6449,6 +6480,14 @@ var Telemetry = {
       let json = JSON.parse(aData);
       this.addData(json.name, json.value);
     }
+  },
+
+  getEnabled: function() {
+    return Services.prefs.getBoolPref(this._PREF_TELEMETRY_ENABLED);
+  },
+
+  setEnabled: function(toEnable) {
+    Services.prefs.setBoolPref(this._PREF_TELEMETRY_ENABLED, toEnable);
   },
 };
 
