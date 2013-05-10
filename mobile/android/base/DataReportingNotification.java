@@ -76,7 +76,7 @@ public class DataReportingNotification {
                                         .setContentIntent(contentIntent)
                                         .setStyle(new NotificationCompat.BigTextStyle()
                                                                         .bigText(notificationBigSummary))
-                                        .addAction(R.drawable.ic_menu_settings, notificationAction, contentIntent)
+                                        .addAction(R.drawable.firefox_settings_alert, notificationAction, contentIntent)
                                         .build();
 
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
